@@ -29,7 +29,7 @@ if [[ "$?" -eq 0 ]];then
 	echo"sam2bam done"
   samtools view -h -q 31 -F 4 -b "${infile%.fastq.gz}.sam.bam" > "${infile%.fastq.gz}.mapq31.bam"
 elif [[ "$?" -eq 1 ]];then
-	echo "Removing mapped reads of low quality failed"
+	echo "sam3bam failed"
   exit 1
 fi
 
@@ -38,7 +38,7 @@ if [[ "$?" -eq 0 ]];then
 	echo "lowQ reads removed"
   samtools sort "${infile%.fastq.gz}.mapq31.bam" > "${infile%.fastq.gz}.sorted.bam"
 elif [[ "$?" -eq 1 ]];then
-	echo "Sorting of bam file failed"
+	echo "Removal of lowQ reads failed"
   exit 1
 fi
 
@@ -49,6 +49,15 @@ elif [[ "$?" -eq 0 ]];then
   echo "bam file sorted"
 	samtools rmdup -s "${infile%.fastq.gz}.mapq31.sorted.bam" "${infile%.fastq.gz}.sorted.dedup.bam"
 elif [[ "$?" -eq 1 ]];then
+  echo "Sorting failed"
+  exit 1
+fi
+
+#Index Bam files
+
+if [[ "$?" -eq 0 ]]; then
+  samtools index "${infile%.fastq.gz}.sorted.dedup.bam"
+elif [[ "$?" -eq 1 ]];then
   echo "Deduplication failed"
   exit 1
 fi
@@ -56,22 +65,28 @@ fi
 #QC
 ##Fastqc
 if [[ "$?" -eq 0 ]]; then
-  zcat "$infile" | fastqc stdin -o "$workdir"
+  if [[ ! -d "$workdir"/qc ]]; then
+    mkdir "$workdir"/qc
+  fi
+  fastqc "$infile" -o "$workdir"/qc
 fi
 
 #Run multiqc
 if [[ "$?" -eq 0 ]];then
-	multiqc "$workdir"
+	multiqc "$workdir"/qc
 fi
 
 #Remove intermediate files and tidy up
 if [[ "$?" -eq 0 ]];then
   rm "${infile%.fastq.gz}.sam" "${infile%.fastq.gz}.mapq31.bam"
-  if [[ ! -d "$workdir"/bamfiles ]]; then
-    mkdir "$workdir"/bamfiles
-    mv "$workdir"/*.bam "$workdir"/bamfiles
+  if [[ ! -d "$workdir"/bam ]]; then
+    mkdir "$workdir"/bam
+    mv "$workdir"/"${infile%.fastq.gz}.sorted.dedup.bam" "$workdir"/bam
+  elif [[ ! -d "$workdir"/fastq ]]; then
+    mkdir "$workdir"/fastq
+    mv "$workdir"/"$infile" "$workdir"/fastq
   fi
 elif [[ "$?" -eq 1 ]];then
-	echo "bowtie2 failed"
+	echo "multiqc failed"
   exit 1
 fi

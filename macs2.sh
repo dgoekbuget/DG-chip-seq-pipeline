@@ -34,7 +34,21 @@ if [[ ! -d "$workdir"/temp ]]; then
   mkdir "$workdir"/temp
 fi
 
+#Outputname
+outname="${treatment[0]}"
+
 #MACS2 peak finding
 source activate python2
 
-macs2 callpeak -t "${treatment[@]}" -c "${control[@]}" -n "${treatment[0]}" --outdir "$workdir"/macs2 -f BAM -g mm -B -p 0.01 --tempdir "$workdir"/temp --verbose 0
+macs2 callpeak -t "${treatment[@]}" -c "${control[@]}" -n "${outname%.sorted.dedup.bam}" --outdir "$workdir"/macs2 -f BAM -g mm -B -p 0.01 --tempdir "$workdir"/temp --verbose 0
+
+source deactivate
+
+#Remove temporary files
+if [[ "$?" -eq 0 ]];then
+  rm "$workdir"/temp/*
+  rmdir "$workdir"/temp
+fi
+
+#Generate crosscorrelation PDFs
+Rscript "$workdir"/macs2/"${treatment[0]}"_model.R
