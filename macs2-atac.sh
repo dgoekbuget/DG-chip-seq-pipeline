@@ -4,7 +4,7 @@
 #$ -o /mnt/blelloch/Deniz/logs  	 # location of standard output
 #$ -r y  						                                                           # rerun job if necessary
 #S -t 1
-#$ -N 'DG-MACS2'	                                                               # give name to job
+#$ -N 'DG-macs-atac'	                                                               # give name to job
 #$ -V                                                                          # exports all environmental variables to qsub
 
 #Read treatment and control files by quoting paths to treatment (-t) and control (-c) files.

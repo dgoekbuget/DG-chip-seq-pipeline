@@ -1,0 +1,4 @@
+multiBigwigSummary bins --binSize 1000 -b DG14_S62_L006_R1_001.sorted.bw ../../sall4_ChIPseq/ERR1328330.mapq31.dedup.sorted.bw ../../sall4_ChIPseq/ERR1328332.mapq31.dedup.sorted.bw ../../sall4_ChIPseq/ERR1328331.mapq31.dedup.sorted.bw -o ./results.npz
+
+
+plotCorrelation --corData results.npz -c spearman -p scatterplot -o results.pdf
