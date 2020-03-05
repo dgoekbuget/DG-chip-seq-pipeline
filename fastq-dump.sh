@@ -12,3 +12,6 @@ infile="${files[$SGE_TASK_ID]}"  # Pick one item from that array
 
 #FASTQ dump
 fastq-dump --gzip --outdir $workdir $infile
+
+#Paired-end
+#fastq-dump -I --split-files --gzip --outdir $workdir $infile

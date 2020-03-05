@@ -55,7 +55,8 @@ if [[ "$?" -eq 0 ]];then
   macs2 bdgcmp -t "$workdir"/macs2/"$factor"/"${outname%.sorted.dedup.bam}"_treat_pileup.bdg -c "$workdir"/macs2/"$factor"/"${outname%.sorted.dedup.bam}"_control_lambda.bdg -o "${outname%.sorted.dedup.bam}"_FE.bdg -m FE --outdir "$workdir"/macs2/"$factor"
 fi
 
-source deactivate
+conda deactivate
+source activate chip
 
 if [[ "$?" -eq 0 ]];then
   echo "FE calculated. Sorting bedgraph..."
@@ -74,3 +75,5 @@ if [[ "$?" -eq 0 ]];then
   echo "Bigwig generated. Removing intermediate files..."
   rm "$workdir"/macs2/"$factor"/"${outname%.sorted.dedup.bam}"_FE.bdg "$workdir"/macs2/"$factor"/"${outname%.sorted.dedup.bam}"_FE.sorted.bdg
 fi
+
+conda deactivate

@@ -16,7 +16,7 @@ scripts="/mnt/iscsi_speed/blelloch/deniz/scripts/DG-chipseq-pipeline"
 GENOME="/mnt/iscsi_speed/blelloch/deniz/genomes/mm10/mm10"
 
 #Remove ^Ms and add newline to EOF
-{ tr '\r' '\n' < $samples; echo; } > "$samples"_temp
+{ cat $samples; echo; } > "$samples"_temp
 mv "$samples"_temp "$samples"
 
 #Extract variables
@@ -44,7 +44,8 @@ qsub -t 1-"$nsamples" -hold_jid "DG-mapping" "$scripts"/macs2_predictd.sh "$work
 
 #Define merged control string
 for (( i = 0; i < "$nctr"; i++ )); do
-  optList1+=(-c $workdir/bam/${ctrs[$i]}.sorted.dedup.bam)
+  optList1+=(-c $workdir/bam/${ctrs[$i]}.Aligned.sortedByCoord.out.bam)
+
 done
 
 #Define each treatment and run MACS2 for each replicate of each treatment vs all ctrs (only if there are controls)
@@ -57,5 +58,6 @@ if [[ "$nctr" -ne 0 ]]; then
       qsub -hold_jid "DG-bam2bw" $scripts/macs2.sh $optList2 ${optList1[@]} -w $workdir -f $i
       echo "MACS2 call: qsub -hold_jid "DG-mapping","DG-crosscor" $scripts/macs2.sh $optList2 ${optList1[@]} -w $workdir"
     done
+
   done
 fi

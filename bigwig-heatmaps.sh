@@ -1,8 +1,22 @@
+#$ -S /bin/bash
+#$ -l mem_free=32G
+#$ -j y   						                                                         # standard error and output merged
+#$ -o /mnt/blelloch/Deniz/logs  	 # location of standard output
+#$ -r y  						                                                           # rerun job if necessary
+#S -t 1
+#$ -N 'DG-macs-atac'	                                                               # give name to job
+#$ -V                                                                          # exports all environmental variables to qsub
+
 #Generate matrix file and heatmap for regions defined in .bed file and .bw files of interest
 
-workdir="$1"
-files=($(awk '{print $1}' $2 ))
-peaks="$workdir"/"$3"
+bws=("$@")
+workdir="/mnt/iscsi_speed/blelloch/deniz/analysis"
+ns=${#bws[@]}
+peaks="$workdir"/out.sorted.bed
+scripts="/mnt/iscsi_speed/blelloch/deniz/scripts"
+heatwidth=1000
 
-#Compute matrix
-computeMatrix reference-point -R $peaks -b 1000 -a 1000 -bl ../../genomes/blacklist/mm10.blacklist.bed -p "max" -out output -S ../../dgrb01_foxd3/macs2/dgrb14_1e3_treat_pileup_FE.bw
+#Compute matrix for each file
+qsub -t "$ns" "$scripts"/bw2matrix.sh $workdir $bws $peaks $heatwidth
+
+#qsub -hold_jid "bw2matrix" "$scripts"/matrix-cbind.sh
